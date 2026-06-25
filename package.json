@@ -1,0 +1,37 @@
+{
+  "author": "Alex Kahn",
+  "description": "A few small, broadly-useful Vue composables for AbsoluteJS apps: useHydrated (SSR hydration gate), isBrowser, useDebouncedAction, and runAsyncAction (try/catch/loading/notify wrapper with an injectable notifier). Vue is a peer dependency.",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "type": "module",
+  "name": "@absolutejs/vue-composables",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/absolutejs/vue-composables.git"
+  },
+  "homepage": "https://github.com/absolutejs/vue-composables",
+  "bugs": {
+    "url": "https://github.com/absolutejs/vue-composables/issues"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && bun build src/index.ts --outdir dist --sourcemap --external vue && tsc --emitDeclarationOnly --project tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts",
+  "version": "0.1.0",
+  "peerDependencies": {
+    "vue": ">=3.3"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vue": "^3.5.38"
+  }
+}
