@@ -2,7 +2,15 @@
  * @absolutejs/vue-composables — small, broadly-useful Vue composables for
  * AbsoluteJS (SSR-first) apps. Vue is a peer dependency.
  */
-import { onMounted, onScopeDispose, ref } from "vue";
+import {
+  computed,
+  onMounted,
+  onScopeDispose,
+  ref,
+  toValue,
+  watch,
+  type MaybeRefOrGetter,
+} from "vue";
 
 /** True on the client, false during SSR — `if (!isBrowser) return;`. */
 export const isBrowser = typeof window !== "undefined";
@@ -129,4 +137,112 @@ export const runAsyncAction = async <T>(
   } finally {
     options.loading?.(false);
   }
+};
+
+// --- Pagination ------------------------------------------------------------
+
+const positiveInteger = (value: number, fallback: number) =>
+  Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;
+
+export type OffsetPaginationOptions = {
+  total: MaybeRefOrGetter<number>;
+  pageSize?: MaybeRefOrGetter<number>;
+  initialPage?: number;
+};
+
+/** Headless, zero-based offset pagination state with automatic last-page clamp. */
+export const useOffsetPagination = (options: OffsetPaginationOptions) => {
+  const page = ref(Math.max(0, Math.floor(options.initialPage ?? 0)));
+  const pageSize = computed(() =>
+    positiveInteger(toValue(options.pageSize ?? 25), 25),
+  );
+  const total = computed(() => Math.max(0, toValue(options.total)));
+  const pageCount = computed(() =>
+    Math.max(1, Math.ceil(total.value / pageSize.value)),
+  );
+  const offset = computed(() => page.value * pageSize.value);
+  const canPrevious = computed(() => page.value > 0);
+  const canNext = computed(() => page.value + 1 < pageCount.value);
+  const rangeStart = computed(() =>
+    total.value === 0 ? 0 : offset.value + 1,
+  );
+  const rangeEnd = (rowCount: MaybeRefOrGetter<number>) =>
+    computed(() =>
+      Math.min(offset.value + Math.max(0, toValue(rowCount)), total.value),
+    );
+  const setPage = (next: number) => {
+    page.value = Math.max(
+      0,
+      Math.min(Math.floor(next), pageCount.value - 1),
+    );
+  };
+  const reset = () => setPage(0);
+  const next = () => {
+    if (canNext.value) page.value += 1;
+  };
+  const previous = () => {
+    if (canPrevious.value) page.value -= 1;
+  };
+
+  watch([total, pageSize], () => setPage(page.value));
+
+  return {
+    canNext,
+    canPrevious,
+    next,
+    offset,
+    page,
+    pageCount,
+    pageSize,
+    previous,
+    rangeEnd,
+    rangeStart,
+    reset,
+    setPage,
+    total,
+  };
+};
+
+/** Cursor history for APIs that return an opaque `nextCursor`. */
+export const useCursorPagination = () => {
+  const cursorStack = ref<Array<string | null>>([null]);
+  const page = ref(0);
+  const nextCursor = ref<string | null>(null);
+  const cursor = computed(() => cursorStack.value[page.value] ?? null);
+  const canPrevious = computed(() => page.value > 0);
+  const canNext = computed(() => nextCursor.value !== null);
+  const setNextCursor = (next: string | null) => {
+    nextCursor.value = next;
+  };
+  const next = () => {
+    if (nextCursor.value === null) return;
+    cursorStack.value = [
+      ...cursorStack.value.slice(0, page.value + 1),
+      nextCursor.value,
+    ];
+    page.value += 1;
+    nextCursor.value = null;
+  };
+  const previous = () => {
+    if (page.value === 0) return;
+    page.value -= 1;
+    nextCursor.value = cursorStack.value[page.value + 1] ?? null;
+  };
+  const reset = () => {
+    cursorStack.value = [null];
+    page.value = 0;
+    nextCursor.value = null;
+  };
+
+  return {
+    canNext,
+    canPrevious,
+    cursor,
+    next,
+    nextCursor,
+    page,
+    previous,
+    reset,
+    setNextCursor,
+  };
 };

@@ -12,6 +12,9 @@ Vue is a peer dependency.
 - **`runAsyncAction(task, options)`** — the try/catch/finally + notify +
   console.error + loading-flag wrapper. Inject your toast once with
   `configureAsyncNotifier({ success, error })`.
+- **`useOffsetPagination(options)`** — zero-based page, offset, range, and
+  navigation state that automatically clamps when a filtered total shrinks.
+- **`useCursorPagination()`** — opaque cursor history for stable keyset APIs.
 
 ```ts
 import {
@@ -26,6 +29,16 @@ await runAsyncAction(() => api.save(payload), {
   successMessage: "Saved",
   loading: (s) => (saving.value = s),
   onSuccess: () => emit("updated"),
+});
+```
+
+```ts
+const total = computed(() => query.data.value?.total ?? 0);
+const pagination = useOffsetPagination({ pageSize: 25, total });
+
+await listRows({
+  limit: pagination.pageSize.value,
+  offset: pagination.offset.value,
 });
 ```
 
