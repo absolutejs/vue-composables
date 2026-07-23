@@ -67,6 +67,63 @@ export const useDebouncedAction = (
   };
 };
 
+// --- ResizeObserver --------------------------------------------------------
+
+export type UseResizeObserverOptions = ResizeObserverOptions;
+
+/**
+ * Observe an element without running reactive DOM writes inside the browser's
+ * ResizeObserver delivery cycle. Notifications are coalesced to the next
+ * animation frame, and the observer/frame are cleaned up when the target
+ * changes or the current Vue scope is disposed.
+ */
+export const useResizeObserver = (
+  target: MaybeRefOrGetter<Element | null | undefined>,
+  callback: ResizeObserverCallback,
+  options: UseResizeObserverOptions = {},
+) => {
+  let observer: ResizeObserver | null = null;
+  let frame: number | null = null;
+  let latestEntries: ResizeObserverEntry[] = [];
+
+  const cancelFrame = () => {
+    if (frame === null) return;
+    cancelAnimationFrame(frame);
+    frame = null;
+    latestEntries = [];
+  };
+  const stop = () => {
+    observer?.disconnect();
+    observer = null;
+    cancelFrame();
+  };
+
+  watch(
+    () => toValue(target),
+    (element) => {
+      stop();
+      if (typeof ResizeObserver === "undefined" || element == null) return;
+
+      observer = new ResizeObserver((entries) => {
+        latestEntries = entries;
+        if (frame !== null) return;
+        frame = requestAnimationFrame(() => {
+          frame = null;
+          const deliveredEntries = latestEntries;
+          latestEntries = [];
+          if (observer !== null) callback(deliveredEntries, observer);
+        });
+      });
+      observer.observe(element, options);
+    },
+    { immediate: true },
+  );
+
+  onScopeDispose(stop);
+
+  return { stop };
+};
+
 // --- runAsyncAction ---------------------------------------------------------
 
 /** Where success/error messages go — inject your toast/snackbar once. */

@@ -9,6 +9,9 @@ Vue is a peer dependency.
 - **`isBrowser`** — `true` on the client, `false` during SSR.
 - **`useDebouncedAction(fn, delayMs?)`** — trailing-edge debouncer auto-cleared
   on scope dispose; `.trigger()` (re)starts the delay.
+- **`useResizeObserver(target, callback, options?)`** — SSR-safe element
+  observer that coalesces notifications to the next animation frame and
+  automatically cleans up when the target or Vue scope changes.
 - **`runAsyncAction(task, options)`** — the try/catch/finally + notify +
   console.error + loading-flag wrapper. Inject your toast once with
   `configureAsyncNotifier({ success, error })`.
@@ -29,6 +32,14 @@ await runAsyncAction(() => api.save(payload), {
   successMessage: "Saved",
   loading: (s) => (saving.value = s),
   onSuccess: () => emit("updated"),
+});
+```
+
+```ts
+const panel = useTemplateRef<HTMLElement>("panel");
+
+useResizeObserver(panel, ([entry]) => {
+  if (entry) compact.value = entry.contentRect.width < 640;
 });
 ```
 
