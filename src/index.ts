@@ -4,6 +4,7 @@
  */
 import {
   computed,
+  nextTick,
   onMounted,
   onScopeDispose,
   ref,
@@ -123,6 +124,50 @@ export const useResizeObserver = (
 
   return { stop };
 };
+
+// --- Textarea composer -----------------------------------------------------
+
+export type AutoGrowTextareaOptions = {
+  /** Maximum rendered height in CSS pixels. May be reactive. */
+  maxHeight?: MaybeRefOrGetter<number>;
+};
+
+/**
+ * Keep a textarea sized to its content until a bounded maximum, then switch to
+ * internal scrolling. The target and maximum may both be reactive, making this
+ * safe for responsive chat composers without mismatched CSS/JS caps.
+ */
+export const useAutoGrowTextarea = (
+  target: MaybeRefOrGetter<HTMLTextAreaElement | null | undefined>,
+  options: AutoGrowTextareaOptions = {},
+) => {
+  const resize = () => {
+    const field = toValue(target);
+    if (!field) return;
+    const configuredMax = toValue(options.maxHeight ?? 168);
+    const maxHeight = positiveInteger(configuredMax, 168);
+    field.style.height = "auto";
+    field.style.height = `${Math.min(field.scrollHeight, maxHeight)}px`;
+    field.style.overflowY = field.scrollHeight > maxHeight ? "auto" : "hidden";
+  };
+
+  watch(
+    [() => toValue(target), () => toValue(options.maxHeight ?? 168)],
+    () => {
+      void nextTick(resize);
+    },
+    { immediate: true },
+  );
+
+  return { resize };
+};
+
+/**
+ * True when a textarea keydown represents a plain Enter submission. Composition
+ * confirmation (IME) and Shift+Enter are deliberately excluded.
+ */
+export const isTextSubmitKey = (event: KeyboardEvent) =>
+  event.key === "Enter" && !event.shiftKey && !event.isComposing;
 
 // --- runAsyncAction ---------------------------------------------------------
 

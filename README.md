@@ -12,6 +12,10 @@ Vue is a peer dependency.
 - **`useResizeObserver(target, callback, options?)`** — SSR-safe element
   observer that coalesces notifications to the next animation frame and
   automatically cleans up when the target or Vue scope changes.
+- **`useAutoGrowTextarea(target, { maxHeight })`** — keeps chat composers
+  content-sized until a reactive maximum, then switches to internal scrolling.
+- **`isTextSubmitKey(event)`** — recognizes plain Enter while excluding
+  Shift+Enter and IME composition confirmation.
 - **`runAsyncAction(task, options)`** — the try/catch/finally + notify +
   console.error + loading-flag wrapper. Inject your toast once with
   `configureAsyncNotifier({ success, error })`.
