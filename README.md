@@ -3,6 +3,14 @@
 A few small, broadly-useful Vue composables for AbsoluteJS (SSR-first) apps.
 Vue is a peer dependency.
 
+## Installation
+
+```sh
+bun add @absolutejs/vue-composables vue
+```
+
+## Composables
+
 - **`useHydrated()`** — a ref that's `false` during SSR + the first client
   render, then `true` after mount. Gate client-only data on it to avoid
   hydration mismatches: `loading = !hydrated.value || actualLoading.value`.
@@ -23,37 +31,43 @@ Vue is a peer dependency.
   navigation state that automatically clamps when a filtered total shrinks.
 - **`useCursorPagination()`** — opaque cursor history for stable keyset APIs.
 
+## Async actions
+
 ```ts
 import {
-  configureAsyncNotifier,
-  runAsyncAction,
-  useHydrated,
-} from "@absolutejs/vue-composables";
+	configureAsyncNotifier,
+	runAsyncAction,
+	useHydrated
+} from '@absolutejs/vue-composables';
 
 configureAsyncNotifier({ success: toast.success, error: toast.error });
 
 await runAsyncAction(() => api.save(payload), {
-  successMessage: "Saved",
-  loading: (s) => (saving.value = s),
-  onSuccess: () => emit("updated"),
+	successMessage: 'Saved',
+	loading: (s) => (saving.value = s),
+	onSuccess: () => emit('updated')
 });
 ```
+
+## Resize observation
 
 ```ts
-const panel = useTemplateRef<HTMLElement>("panel");
+const panel = useTemplateRef<HTMLElement>('panel');
 
 useResizeObserver(panel, ([entry]) => {
-  if (entry) compact.value = entry.contentRect.width < 640;
+	if (entry) compact.value = entry.contentRect.width < 640;
 });
 ```
+
+## Pagination
 
 ```ts
 const total = computed(() => query.data.value?.total ?? 0);
 const pagination = useOffsetPagination({ pageSize: 25, total });
 
 await listRows({
-  limit: pagination.pageSize.value,
-  offset: pagination.offset.value,
+	limit: pagination.pageSize.value,
+	offset: pagination.offset.value
 });
 ```
 
