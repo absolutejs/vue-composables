@@ -50,7 +50,7 @@ const renderer = createRenderer<TestNode, TestNode>({
 });
 
 describe("useHydrated", () => {
-  test("stays false through mounted hooks and flips on the next Vue tick", async () => {
+  test("stays false through Vue's hydration tick and flips afterward", async () => {
     let hydrated: Ref<boolean> | undefined;
     const app = renderer.createApp({
       setup: () => {
@@ -64,6 +64,9 @@ describe("useHydrated", () => {
     expect(hydrated?.value).toBeFalse();
 
     await nextTick();
+    expect(hydrated?.value).toBeFalse();
+
+    await Bun.sleep(1);
     expect(hydrated?.value).toBeTrue();
   });
 });

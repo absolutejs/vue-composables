@@ -32,13 +32,12 @@ export const useHydrated = () => {
   const hydrated = ref(false);
   onMounted(() => {
     // A nested component's mounted hook can run while Vue is still traversing
-    // the root SSR fragment. Mutating rendered state in that hook can insert a
-    // node mid-hydration and make Vue compare the next fragment anchor with a
-    // script outside the mount container. The next tick starts after the
-    // hydration traversal has completed.
-    void nextTick(() => {
+    // the root SSR fragment, and Vue may drain nextTick callbacks inside that
+    // same traversal. Crossing a task boundary ensures the entire root has
+    // hydrated before client-only nodes can be inserted.
+    setTimeout(() => {
       hydrated.value = true;
-    });
+    }, 0);
   });
 
   return hydrated;
