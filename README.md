@@ -24,6 +24,9 @@ bun add @absolutejs/vue-composables vue
   content-sized until a reactive maximum, then switches to internal scrolling.
 - **`isTextSubmitKey(event)`** — recognizes plain Enter while excluding
   Shift+Enter and IME composition confirmation.
+- **`useClickOutside(target, handler)`** — fires `handler` on a capture-phase
+  `pointerdown` outside `target`; auto-removed on scope dispose. For a
+  toggle-button + panel pair, pass the element wrapping both.
 - **`runAsyncAction(task, options)`** — the try/catch/finally + notify +
   console.error + loading-flag wrapper. Inject your toast once with
   `configureAsyncNotifier({ success, error })`.

@@ -175,6 +175,40 @@ export const useAutoGrowTextarea = (
 export const isTextSubmitKey = (event: KeyboardEvent) =>
   event.key === "Enter" && !event.shiftKey && !event.isComposing;
 
+// --- Click outside -----------------------------------------------------------
+
+/**
+ * Invoke `handler` when a pointer press lands outside `target`. Listens on
+ * `document` in the capture phase — `pointerdown` fires before `click`, so the
+ * press is observed even when an inner handler stops propagation — and cleans
+ * up on scope dispose. No-op during SSR.
+ *
+ * For a toggle-button + panel pair, pass the element wrapping BOTH: if the
+ * target is the panel alone, pressing the button counts as "outside", closes
+ * the panel, and the button's own click immediately reopens it.
+ */
+export const useClickOutside = (
+  target: MaybeRefOrGetter<Element | null | undefined>,
+  handler: (event: PointerEvent) => void,
+) => {
+  const listener = (event: PointerEvent) => {
+    const element = toValue(target);
+    if (!element) return;
+    if (event.target instanceof Node && element.contains(event.target)) return;
+    handler(event);
+  };
+
+  const canListen = typeof document !== "undefined";
+  if (canListen) document.addEventListener("pointerdown", listener, true);
+
+  const stop = () => {
+    if (canListen) document.removeEventListener("pointerdown", listener, true);
+  };
+  onScopeDispose(stop);
+
+  return { stop };
+};
+
 // --- runAsyncAction ---------------------------------------------------------
 
 /** Where success/error messages go — inject your toast/snackbar once. */
