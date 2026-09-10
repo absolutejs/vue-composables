@@ -5,7 +5,7 @@
     "": {
       "name": "@absolutejs/vue-composables",
       "devDependencies": {
-        "@absolutejs/changelog": "^0.1.2",
+        "@absolutejs/changelog": "^0.2.0",
         "typescript": "^6.0.3",
         "vue": "^3.5.38",
       },
@@ -15,7 +15,7 @@
     },
   },
   "packages": {
-    "@absolutejs/changelog": ["@absolutejs/changelog@0.1.2", "", { "bin": { "absolute-changelog": "dist/cli.js" } }, "sha512-q6gQwkDr0IVdWHzTOT3AaZvPSn0ucNidbjBnAUZ8CSwS3wrCd02YMXuBC8sd0ptpYvCowLnR/QWIpBrNqbn+YA=="],
+    "@absolutejs/changelog": ["@absolutejs/changelog@0.2.0", "", { "bin": { "absolute-changelog": "dist/cli.js" } }, "sha512-9GdRyWB3X5zEwlTcVCH+qUS84FTChCoZvli0z3Gp8SI3pnLN4XK3vO0s45dPk5ZfezxAzC1ZwlKWTh44eLxh1w=="],
 
     "@babel/helper-string-parser": ["@babel/helper-string-parser@7.29.7", "", {}, "sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw=="],
 
